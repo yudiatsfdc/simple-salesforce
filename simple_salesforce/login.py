@@ -45,6 +45,11 @@ def SalesforceLogin(**kwargs):
     username = escape(username)
     password = escape(password)
 
+    # check if endpoint is in request
+    if 'end_point' in kwargs:
+        soap_url = '{end_point}/services/Soap/u/{sf_version}'
+        soap_url = soap_url.format(end_point=kwargs['end_point'],sf_version=sf_version)
+
     # Check if token authentication is used
     if 'security_token' in kwargs:
         security_token = kwargs['security_token']
@@ -116,6 +121,8 @@ def SalesforceLogin(**kwargs):
 
     session_id = getUniqueElementValueFromXmlString(response.content, 'sessionId')
     server_url = getUniqueElementValueFromXmlString(response.content, 'serverUrl')
+    organization_id = getUniqueElementValueFromXmlString(response.content, 'organizationId')
+    user_id = getUniqueElementValueFromXmlString(response.content, 'userId')
 
     sf_instance = (server_url
                    .replace('http://', '')
@@ -123,7 +130,7 @@ def SalesforceLogin(**kwargs):
                    .split('/')[0]
                    .replace('-api', ''))
 
-    return session_id, sf_instance
+    return session_id, sf_instance, organization_id, user_id
 
 
 class SalesforceAuthenticationFailed(Exception):
